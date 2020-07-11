@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  #traefik:
+  #  # The official v2.0 Traefik docker image
+  #  image: traefik:v2.1
+  #  container_name: "traefik"
+  #  # Enables the web UI and tells Traefik to listen to docker
+  #  command: 
+  #    #- "--log.level=DEBUG"
+  #    - "--log.level=ERROR"
+  #    - "--api.insecure=true"
+  #    - "--providers.docker=true"
+  #    #- "--providers.docker.exposedbydefault=false"
+  #    #- "--entrypoints.vault.address=:443"
+  #    #- "--entrypoints.consul.address=:444"
+  #    #- "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+  #    #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+  #    #- "--certificatesresolvers.myresolver.acme.email=seanmarman@gmail.com"
+  #    #- "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #  ports:
+  #    # The HTTP port
+  #    - "80:80"
+  #    - "443:443"
+  #    # The Web UI (enabled by --api.insecure=true)
+  #    - "8080:8080"
+  #  volumes:
+  #    - "./letsencrypt:/letsencrypt"
+  #    - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  goapi:
+    container_name: goapinew
+    image: "smarman/ubuntudev:0.1.9"
+    volumes:
+      - .:/srv
+    command: ["tail", "-f", "/dev/null"]
+    labels:
+      - "traefik.http.routers.goapinew.rule=Host(`goapinew.local.seanhome.xyz`)"
+      - "traefik.http.services.goapinew.loadbalancer.server.port=8090"
+
+  database:
+    container_name: postgresnew
+    image: "postgres"
+    env_file:
+      - psql.env
+    volumes:
+      - ./clubdata.sql:/docker-entrypoint-initdb.d/clubdata.sql
+    labels:
+      - "traefik.http.routers.psql.rule=Host(`psql.local.seanhome.xyz`)"
+      - "traefik.http.services.psql.loadbalancer.server.port=5432"
+
+networks: 
+  default:
+    external:
+      name: traefik_default

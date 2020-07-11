@@ -1,0 +1,13 @@
+psql dbname=posts
+
+
+CREATE TABLE posts (
+  ID serial NOT NULL PRIMARY KEY,
+  post_info json NOT NULL
+);
+
+INSERT INTO posts (post_info) VALUES (
+  '{"name": "Go Pointers", "desc": "This is a test post from the database...", "tags": {"posted": "07.06.2020", "type": "coding"}}',
+  '{"name": "Go Interfaces", "desc": "This is another test post from the database...", "tags": {"posted": "07.07.2020", "type": "coding"}}',
+);
+
