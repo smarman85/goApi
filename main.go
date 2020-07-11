@@ -59,7 +59,8 @@ func queryPosts(postData *posts) error {
     log.Fatal("Failed to open DB connection: ", err)
   }
 
-  rows, err := db.Query(`SELECT * FROM new_posts;`)
+  //rows, err := db.Query(`SELECT * FROM new_posts;`)
+  rows, err := db.Query(`SELECT * FROM posts;`)
   //rows, err := db.Query(`SELECT id, post_info -> 'name' FROM posts;`)
   if err != nil {
     return err
