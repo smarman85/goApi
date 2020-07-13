@@ -12,6 +12,16 @@ import (
   "os"
 )
 
+type Person struct {
+  Name string
+  Age int
+}
+
+type Post struct {
+  Name string
+  Desc string
+}
+
 type postInfo struct {
   ID int
   INFO json.RawMessage
@@ -41,6 +51,18 @@ func psqlCon() string {
     db,
   )
   return con
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
+    respondWithJSON(w, code, map[string]string{"error": message})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+    response, _ := json.Marshal(payload)
+
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(code)
+    w.Write(response)
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -103,11 +125,34 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
   f.Fprint(w, string(out))
 }
 
+func createPost(w http.ResponseWriter, r *http.Request) {
+  //var p NewPost
+  var p Post
+
+  err := json.NewDecoder(r.Body).Decode(&p)
+  if err != nil {
+      http.Error(w, err.Error(), http.StatusBadRequest)
+      return
+  }
+
+  // Do something with the Person struct...
+  f.Fprintf(w, "%+v", p)
+
+  //err := db.QueryRow(
+  //  `INSERT INTO posts (post_info) VALUES (
+  //    p
+  //  );
+  //`)
+  //respondWithJSON(w, http.StatusCreated, p)
+}
+
+
 func main() {
   dbConn := psqlCon()
   f.Println(dbConn)
   router := mux.NewRouter()
   router.HandleFunc("/", home)
   router.HandleFunc("/posts", getPosts).Methods("GET")
+  router.HandleFunc("/new_post", createPost).Methods("POST")
   log.Fatal(http.ListenAndServe(":8090", router))
 }
