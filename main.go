@@ -17,6 +17,8 @@ type Person struct {
   Age int
 }
 
+type Posts map[string]interface{}
+
 type Post struct {
   Name string
   Desc string
@@ -127,25 +129,51 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 
 func createPost(w http.ResponseWriter, r *http.Request) {
   //var p NewPost
-  var p Post
+  var p Posts
 
   err := json.NewDecoder(r.Body).Decode(&p)
   if err != nil {
       http.Error(w, err.Error(), http.StatusBadRequest)
       return
   }
+  DB_CON := psqlCon()
+  // create db pool
+  db, err := sql.Open("postgres", DB_CON)
+  if err != nil {
+    log.Fatal("Failed to open DB connection: ", err)
+  }
 
+  input, _ := json.Marshal(p)
   // Do something with the Person struct...
-  f.Fprintf(w, "%+v", p)
+  _, err = db.Exec("INSERT INTO posts (post_info) VALUES ($1) RETURNING ID;", input)
+  if err != nil {
+    log.Fatal(err)
+  }
+  if err != nil {
+    log.Fatal("Failed to update db: ", err)
+  }
 
-  //err := db.QueryRow(
-  //  `INSERT INTO posts (post_info) VALUES (
-  //    p
-  //  );
-  //`)
-  //respondWithJSON(w, http.StatusCreated, p)
+  f.Fprintf(w, "%+v", string(input))
+
 }
 
+func deletePost(w http.ResponseWriter, r *http.Request) {
+
+  vars := mux.Vars(r)
+  id := vars["id"]
+  DB_CON := psqlCon()
+  // create db pool
+  db, err := sql.Open("postgres", DB_CON)
+  if err != nil {
+    log.Fatal("Failed to open DB connection: ", err)
+  }
+
+  _, err = db.Exec("DELETE FROM posts WHERE id=$1", id)
+  if err != nil {
+    log.Fatal("Failed to remove from database: ", err)
+  }
+
+}
 
 func main() {
   dbConn := psqlCon()
@@ -154,5 +182,6 @@ func main() {
   router.HandleFunc("/", home)
   router.HandleFunc("/posts", getPosts).Methods("GET")
   router.HandleFunc("/new_post", createPost).Methods("POST")
+  router.HandleFunc("/retract/{id}", deletePost).Methods("DELETE")
   log.Fatal(http.ListenAndServe(":8090", router))
 }
