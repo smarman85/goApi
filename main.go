@@ -127,6 +127,25 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
   f.Fprint(w, string(out))
 }
 
+func getPost(w http.ResponseWriter, r *http.Request) {
+
+  vars := mux.Vars(r)
+  id := vars["id"]
+  f.Println(id)
+
+  DB_CON := psqlCon()
+  // create db pool
+  db, err := sql.Open("postgres", DB_CON)
+  if err != nil {
+    log.Fatal("Failed to open DB connection: ", err)
+  }
+  
+  row := db.QueryRow("SELECT * FROM posts WHERE id=$1", id)
+  json.NewEncoder(w).Encode(row)
+  f.Println(row)
+
+}
+
 func createPost(w http.ResponseWriter, r *http.Request) {
   //var p NewPost
   var p Posts
@@ -181,6 +200,7 @@ func main() {
   router := mux.NewRouter()
   router.HandleFunc("/", home)
   router.HandleFunc("/posts", getPosts).Methods("GET")
+  router.HandleFunc("/post/{id}", getPost).Methods("GET")
   router.HandleFunc("/new_post", createPost).Methods("POST")
   router.HandleFunc("/retract/{id}", deletePost).Methods("DELETE")
   log.Fatal(http.ListenAndServe(":8090", router))
