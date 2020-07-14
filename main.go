@@ -140,9 +140,13 @@ func getPost(w http.ResponseWriter, r *http.Request) {
     log.Fatal("Failed to open DB connection: ", err)
   }
   
-  row := db.QueryRow("SELECT * FROM posts WHERE id=$1", id)
-  json.NewEncoder(w).Encode(row)
-  f.Println(row)
+  var p postInfo
+  row := db.QueryRow("SELECT * FROM posts WHERE id=$1;", id)
+  err = row.Scan(&p.ID, &p.INFO)
+  if err != nil {
+    panic(err)
+  }
+  f.Fprint(w, p)
 
 }
 
