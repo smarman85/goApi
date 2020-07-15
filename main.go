@@ -12,11 +12,6 @@ import (
   "os"
 )
 
-type Person struct {
-  Name string
-  Age int
-}
-
 type Posts map[string]interface{}
 
 type Post struct {
@@ -131,7 +126,6 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 
   vars := mux.Vars(r)
   id := vars["id"]
-  f.Println(id)
 
   DB_CON := psqlCon()
   // create db pool
@@ -146,7 +140,9 @@ func getPost(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     panic(err)
   }
-  f.Fprint(w, p)
+  //f.Printf("%T\n", p.INFO)
+  //f.Fprint(w, p.ID)
+  f.Fprint(w, string(p.INFO))
 
 }
 
@@ -198,13 +194,30 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func updatePost(w http.ResponseWriter, r *http.Request) {
+  vars := mux.Vars(r)
+  id := vars["id"]
+  f.Println(id)
+  DB_CON := psqlCon()
+  db, err := sql.Open("postgres", DB_CON)
+  if err != nil {
+    log.Fatal("Failed to open DB connection: ", err)
+  }
+
+  _, err = db.Exec("UPDATE posts SET post_info=$1 WHERE id=$2;" ??, id)
+  if err != nil {
+    log.Fatal("Failed to update record: ", err)
+  }
+}
+
 func main() {
-  dbConn := psqlCon()
-  f.Println(dbConn)
+  //dbConn := psqlCon()
+  //f.Println(dbConn)
   router := mux.NewRouter()
   router.HandleFunc("/", home)
   router.HandleFunc("/posts", getPosts).Methods("GET")
   router.HandleFunc("/post/{id}", getPost).Methods("GET")
+  router.HandleFunc("/post/{id}", updatePost).Methods("PUT")
   router.HandleFunc("/new_post", createPost).Methods("POST")
   router.HandleFunc("/retract/{id}", deletePost).Methods("DELETE")
   log.Fatal(http.ListenAndServe(":8090", router))
