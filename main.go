@@ -197,14 +197,22 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 func updatePost(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   id := vars["id"]
-  f.Println(id)
+  //f.Println(id)
   DB_CON := psqlCon()
   db, err := sql.Open("postgres", DB_CON)
   if err != nil {
     log.Fatal("Failed to open DB connection: ", err)
   }
 
-  _, err = db.Exec("UPDATE posts SET post_info=$1 WHERE id=$2;" ??, id)
+  var p Posts
+  err = json.NewDecoder(r.Body).Decode(&p)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusBadRequest)
+    return
+  }
+  input, _ := json.Marshal(p)
+
+  _, err = db.Exec("UPDATE posts SET post_info=$1 WHERE id=$2;", input, id)
   if err != nil {
     log.Fatal("Failed to update record: ", err)
   }
