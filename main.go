@@ -218,7 +218,17 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
   }
 }
 
+func SetToken() string {
+  err := godotenv.Load("psql.env")
+  if err != nil {
+    f.Println("Error loading env file: ", err)
+  }
+  return os.Getenv("TOKEN")
+}
+
 func main() {
+  token := SetToken()
+  f.Println(token)
   //dbConn := psqlCon()
   //f.Println(dbConn)
   router := mux.NewRouter()

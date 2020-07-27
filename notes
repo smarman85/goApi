@@ -11,3 +11,42 @@ INSERT INTO posts (post_info) VALUES (
   '{"name": "Go Interfaces", "desc": "This is another test post from the database...", "tags": {"posted": "07.07.2020", "type": "coding"}}',
 );
 
+
+curl -s http://goapinew.local.seanhome.xyz | jq .
+{
+  "message": "Welcome. Please have a look around"
+}
+
+curl -s http://goapinew.local.seanhome.xyz/posts | jq .
+{
+  "Posts": [
+    {
+      "ID": 1,
+      "INFO": {
+        "name": "Go Pointers",
+        "desc": "This is a test post from the database...",
+        "tags": {
+          "posted": "07.06.2020",
+          "type": "coding"
+        }
+      }
+    },
+
+curl -s http://goapinew.local.seanhome.xyz/post/1 | jq .
+{
+  "name": "Go Pointers",
+  "desc": "This is a test post from the database...",
+  "tags": {
+    "posted": "07.06.2020",
+    "type": "coding"
+  }
+}
+
+curl -s -X PUT -H "Content-Type: application/json" -d @new.json http://goapinew.local.seanhome.xyz/post/9
+
+
+curl -s -X DELETE http://goapinew.local.seanhome.xyz/retract/12
+
+
+curl -s -H "Content-Type: application/json" -d @new.json http://goapinew.local.seanhome.xyz/new_post | jq .
+
