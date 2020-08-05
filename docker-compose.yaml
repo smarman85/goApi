@@ -46,7 +46,7 @@ services:
     env_file:
       - psql.env
     volumes:
-      - ./posts.sql:/docker-entrypoint-initdb.d/
+      - ./posts.sql:/docker-entrypoint-initdb.d/posts.sql
     labels:
       - "traefik.http.routers.psql.rule=Host(`psql.local.seanhome.xyz`)"
       - "traefik.http.services.psql.loadbalancer.server.port=5432"
