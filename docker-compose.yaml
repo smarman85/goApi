@@ -32,9 +32,11 @@ services:
     container_name: goapinew
     image: "smarman/ubuntudev:0.1.9"
     restart: unless-stopped
+    working_dir: "/srv"
     volumes:
       - .:/srv
-    command: ["tail", "-f", "/dev/null"]
+    #command: ["tail", "-f", "/dev/null"]
+    command: ["/usr/local/go/bin/go", "run", "main.go"]
     labels:
       - "traefik.http.routers.goapinew.rule=Host(`goapinew.local.seanhome.xyz`)"
       - "traefik.http.services.goapinew.loadbalancer.server.port=8090"
